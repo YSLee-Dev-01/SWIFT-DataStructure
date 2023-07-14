@@ -54,6 +54,11 @@ class DobuleLinkedList<T: Equatable> {
         let new = Node(data: data, prev: node, next: next)
         node?.next = new
         next?.prev = new
+        
+        // node가 마지막일 때
+        if node?.next == nil {
+            self.tail = new
+        }
     }
     
     func removeLast() {
@@ -75,7 +80,7 @@ class DobuleLinkedList<T: Equatable> {
         self.tail != nil else {return}
         
         guard self.head?.next != nil else {
-            self.head = nil
+            self.head = self.head?.next
             self.tail = nil
             return
         }
@@ -95,6 +100,11 @@ class DobuleLinkedList<T: Equatable> {
         let next = node?.next?.next
         next?.prev = node
         node?.next = next
+        
+        // node가 마지막일 때
+        if next?.next == nil {
+            self.tail = next
+        }
     }
     
     func searchNode(data: T) -> Node<T>? {

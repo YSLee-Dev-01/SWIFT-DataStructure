@@ -67,7 +67,7 @@ class LinkedList<T: Equatable> {
     func remove(index: Int) {
         guard self.head != nil else {return}
         guard index != 0 || self.head?.next == nil else {
-            self.head = nil
+            self.head = self.head?.next
             return
         }
         
