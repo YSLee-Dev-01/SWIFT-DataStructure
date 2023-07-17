@@ -44,6 +44,12 @@ class DobuleLinkedList<T: Equatable> {
             
         }
         
+        guard index != 0 else {
+            self.head?.prev = Node(data: data, next: self.head)
+            self.head = self.head?.prev
+            return
+        }
+        
         var node = self.head
         for _ in 1 ..< index {
             if node?.next == nil {break}
