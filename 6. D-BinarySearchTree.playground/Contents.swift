@@ -145,6 +145,7 @@ class BinarySearchTree<T: Comparable> {
                 changeNodeParent.left = nil
             }
             changeNode.right = removeNode.right
+            changeNode.left = removeNode.left
         } else {
             changeNode.left = removeNode.left
         }
@@ -197,7 +198,14 @@ intValue.insert(data: 29)
 intValue.insert(data: 28)
 intValue.insert(data: 34)
 intValue.insert(data: 30)
+intValue.insert(data: 31)
+intValue.insert(data: 32)
+intValue.insert(data: 33)
 intValue.drawDiagram()
+
+intValue.delete(data: 40)
+intValue.drawDiagram()
+
 
 intValue.delete(data: 31)
 intValue.drawDiagram()
