@@ -60,11 +60,11 @@ struct FixQueue<T> {
     private var frontIndex = 0 // 마지막 값(Front)를 가르키는 Index 정의
     
     public func count() -> Int {
-        self.queue.count
+        self.queue.count - self.frontIndex
     }
     
     public func isEmpty() -> Bool {
-        self.queue.isEmpty
+        self.frontIndex == 0 ? self.queue.isEmpty : self.queue[self.frontIndex] == nil
     }
     
     public mutating func enQueue(_ element: T) {
@@ -79,7 +79,7 @@ struct FixQueue<T> {
         self.queue[self.frontIndex] = nil
         self.frontIndex += 1
         
-        if self.frontIndex == 30 { // nil 값이 30개가 되면 그 때 오버헤드 발생 (removeFirst)
+        if self.frontIndex == 50 { // nil 값이 30개가 되면 그 때 오버헤드 발생 (removeFirst)
             self.queue.removeFirst(self.frontIndex)
             self.frontIndex = 0
         } else {
@@ -91,10 +91,12 @@ struct FixQueue<T> {
 
 print("FIX QUEUE--------------------------------")
 var fixStringQueue = FixQueue<Int>()
-for x in 0 ..< 499 {
+for x in 0 ..< 500 {
     fixStringQueue.enQueue(x)
 }
+print(fixStringQueue.count())
 
-for _ in 0 ... 99 {
+for _ in 0 ... 69 {
     print(fixStringQueue.deQueue())
 }
+print(fixStringQueue.count())
