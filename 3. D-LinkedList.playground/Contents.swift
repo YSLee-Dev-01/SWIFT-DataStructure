@@ -74,6 +74,7 @@ class LinkedList<T: Equatable> {
         var nowNode = self.head
         for _ in 0 ..< index - 1 { // 해당 index의 전 Node까지만 이동하여 순서를 변경함
             nowNode = nowNode?.next
+            if nowNode == nil {return} // 추가를 원했던 index가 잘못되어 nil 값인 경우 아무런 작업을 하지 않음
         }
         var newNode = Node(data: data, next: nowNode?.next)
         nowNode?.next = newNode
@@ -94,11 +95,11 @@ class LinkedList<T: Equatable> {
         if self.head == nil {return}
         if self.head?.next == nil {self.head = nil; return}
         
-        var nowHead = self.head
-        while nowHead?.next?.next != nil { // 현재 Head의 next의 next가 없다는 건 Head의 바로 이후 next가 마지막이라는 뜻
-            nowHead = nowHead?.next
+        var nowNode = self.head
+        while nowNode?.next?.next != nil { // 현재 Head의 next의 next가 없다는 건 Head의 바로 이후 next가 마지막이라는 뜻
+            nowNode = nowNode?.next
         }
-        nowHead?.next = nil
+        nowNode?.next = nil
     }
     
     func remove(at index: Int) {
@@ -108,12 +109,12 @@ class LinkedList<T: Equatable> {
             return
         }
         
-        var nowHead = self.head
+        var nowNode = self.head
         for _ in 0 ..< index - 1 {
-            nowHead = nowHead?.next
-            if nowHead == nil {return} // 삭제를 원했던 index가 잘못되어 nil 값인 경우 아무런 작업을 하지 않음
+            nowNode = nowNode?.next
+            if nowNode == nil {return} // 삭제를 원했던 index가 잘못되어 nil 값인 경우 아무런 작업을 하지 않음
         }
-        nowHead?.next = nowHead?.next?.next
+        nowNode?.next = nowNode?.next?.next
     }
 }
 
