@@ -42,6 +42,7 @@ class DoublyLinkedList<T: Equatable> {
             return
         }
         
+        // 단방향 연결리스트와 달리 tail을 수정 후 기존 연결된 부분만 수정
         newNode.prev = self.tail
         self.tail?.next = newNode
         self.tail = newNode
@@ -59,30 +60,122 @@ class DoublyLinkedList<T: Equatable> {
             return
         }
         
+        if index == 0 { // head 변경 시
+            newNode.next = self.head
+            self.head = newNode
+            self.count += 1
+            print("HEAD 변경됨")
+            print("HEAD 다음 값 (기존 HEAD) \(self.head?.next?.data)")
+            return
+        } else if index >= self.count { // tail 변경 시
+            self.append(data)
+            print("TAIL 변경됨")
+            return
+        }
         
-        var isHead = self.count / 2 >= index
+        var isHead = self.count / 2 >= index // head, tail의 가까운 지점을 count로 계산
         print(isHead ? "HEAD로 진행" : "PREV로 진행")
         
         var nowNode = isHead ? self.head : self.tail
+        // head는 내 앞에 데이터를 추가해야하기 때문에 index(count - 1)만큼 이동
+        // tail의 경우 내 전에 데이터를 추가해야 하기 때문에 self.count에 -1을 하지 않음 (내 자신을 뒤로 밀기 위함 -> nowNode는 내 자신)
+        // newNode를 원하는 index에 추가하고 nowNode는 index가 밀리게 함
         for _ in stride(from: isHead ? 0 : self.count, to: isHead ? index - 1 : index + 1, by: isHead ? +1 : -1) {
             if (isHead && nowNode?.next == nil) || (!isHead && nowNode?.prev == nil) {
                 break
             }
             nowNode = isHead ? nowNode?.next : nowNode?.prev
         }
-        newNode.next = nowNode?.next
-        nowNode?.next = newNode
-        
-        newNode.next?.prev = newNode
-        newNode.prev = nowNode
+        if isHead {
+            newNode.next = nowNode?.next
+            nowNode?.next = newNode
+            
+            newNode.next?.prev = newNode
+            newNode.prev = nowNode
+            
+            print("변경 기준 점 \(nowNode?.data)")
+            print("변경 기준 점 다음 값 (insert) \(nowNode?.next?.data)")
+            print("insert한 값 (위와 동일해야함) \(newNode.data)")
+            print("insert한 다음 값 \(newNode.next?.data)")
+            print("insert한 다음 값의 전 값 (insert data가 나와야함) \(newNode.next?.prev?.data)")
+            print("insert한 다음 값의 전 전 값 (insert data의 전 데이터가 나와야함) \(newNode.next?.prev?.prev?.data)")
+        } else {
+            newNode.prev = nowNode?.prev
+            newNode.prev?.next = newNode
+            
+            newNode.next = nowNode
+            nowNode?.prev = newNode
+            
+            print("변경 기준 점 \(nowNode?.data)")
+            print("변경 기준 점 전 값 (insert) \(nowNode?.prev?.data)")
+            print("insert한 값 (위와 동일해야함) \(newNode.data)")
+            print("insert한 다음 값 (변경 기준 점이 나와야함) \(newNode.next?.data)")
+            print("insert한 다음 값의 다음 값 (insert Data의 다다음 나와야함) \(newNode.next?.next?.data)")
+            print("insert한 값의 전 값 (insert Data의 전이 나와야함) \(newNode.prev?.data)")
+        }
+       
         self.count += 1
         
-        print("변경 기준 점 \(nowNode?.data)")
-        print("변경 기준 점 다음 값 (insert) \(nowNode?.next?.data)")
-        print("insert한 값 (위와 동일해야함) \(newNode.data)")
-        print("insert한 다음 값 \(newNode.next?.data)")
-        print("insert한 다음 값의 전 값 (insert data가 나와야함) \(newNode.next?.prev?.data)")
-        print("insert한 다음 값의 전 전 값 (insert data의 전 데이터가 나와야함) \(newNode.next?.prev?.prev?.data)")
+       
+    }
+    
+    func removeLast() {
+        if self.head == nil || self.tail == nil {
+            return
+        } else if self.count == 1 { // 데이터가 하나만 있을 때
+            self.head = nil
+            self.tail = nil
+            self.count -= 1
+            return
+        }
+        
+        // 단방향 연결리스트와 달리 tail을 수정 후 기존 연결된 부분만 수정
+        self.tail = self.tail?.prev
+        self.tail?.next = nil
+        self.count -= 1
+        print("RemoveLast 후 Tail 값 \(self.tail?.data)")
+        print("RemoveLast 후 Tail의 Next 값 \(self.tail?.next?.data)")
+    }
+    
+    func remove(at index: Int) {
+        if self.head == nil || self.tail == nil || self.count < index { // index 값이 잘못되거나 삭제할 데이터가 없는 경우 return
+            return
+        }
+        
+        if index == 0 {
+            self.head = self.head?.next
+            self.head?.prev = nil
+            print("HEAD 변경됨")
+            return
+        } else if index == self.count - 1 {
+            self.removeLast()
+            print("TAIL 변경됨")
+            return
+        }
+        
+        var isHead = self.count / 2 >= index
+        var nowNode = isHead ? self.head : self.tail
+        // tail의 경우 insert와 달리 자기 자신은 자신이 지울 수 없기 때문에 index(count - 1)을 적용하여 내 뒤에서 자신을 지우도록 함
+        // Head 또한 자기 자신은 자신이 지울 수 없기 때문에 index - 1을 적용하여 내 앞에서 자신을 지우도록 함
+        for _ in stride(from: isHead ? 0 : self.count - 1, to: isHead ? index - 1 : index + 1, by: isHead ? +1 : -1) {
+            if (isHead && nowNode?.next == nil) || (!isHead && nowNode?.prev == nil) {
+                return // next, prev가 없을 때는 지우지 않고 return
+            }
+            nowNode = isHead ? nowNode?.next : nowNode?.prev
+        }
+        
+        if isHead {
+            nowNode?.next = nowNode?.next?.next
+            nowNode?.next?.prev = nowNode
+        } else {
+            nowNode?.prev = nowNode?.prev?.prev
+            nowNode?.prev?.next = nowNode
+        }
+        self.count -= 1;
+        
+        print("기준점이 되는 Node \(nowNode?.data)")
+        print("기준점이 되는 Node의 전 값 \(nowNode?.prev?.data)")
+        print("기준점이 되는 Node의 다음 값 \(nowNode?.next?.data)")
     }
     
 }
@@ -96,6 +189,18 @@ print("-----------")
 intList.insert(data: 4, index: 1)
 print("-----------")
 intList.insert(data: 9, index: 3)
+print("-----------")
+intList.removeLast()
+print("-----------")
+intList.insert(data: -1, index: 0)
+print("-----------")
+intList.insert(data: 10, index: 6)
+print("-----------")
+intList.remove(at: 0)
+print("-----------")
+intList.remove(at: 1)
+print("-----------")
+intList.remove(at: 4)
 
 // 이전 공부 기록
 //
