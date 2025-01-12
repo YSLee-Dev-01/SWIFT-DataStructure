@@ -178,29 +178,61 @@ class DoublyLinkedList<T: Equatable> {
         print("기준점이 되는 Node의 다음 값 \(nowNode?.next?.data)")
     }
     
+    func search(from data: T) -> Node<T>? {
+        if self.head == nil || self.tail == nil, self.count == 0 {
+            return nil
+        }
+        
+        var firstNode = self.head
+        var lastNode = self.tail
+        
+        for _ in (0 ..< self.count / 2) {
+            // Head와 Tail 값을 이용해서 동시에 검색해요.
+            if firstNode?.data == data {
+                return firstNode
+            } else if lastNode?.data == data {
+                return lastNode
+            }
+            
+            firstNode = firstNode?.next
+            lastNode = lastNode?.next
+            if firstNode == nil && lastNode == nil {
+                break
+            }
+        }
+        return nil
+    }
+    
 }
 
 var intList = DoublyLinkedList<Int>()
-intList.append(0)
-intList.append(1)
-intList.append(2)
-intList.append(3)
+intList.append(0) // 0
+intList.append(1) // 0, 1
+intList.append(2) // 0, 1, 2
+intList.append(3) // 0, 1, 2, 3
 print("-----------")
-intList.insert(data: 4, index: 1)
+intList.insert(data: 4, index: 1) // 0, 4, 1, 2, 3
 print("-----------")
-intList.insert(data: 9, index: 3)
+intList.insert(data: 9, index: 3) // 0, 4, 1, 9, 2, 3
 print("-----------")
-intList.removeLast()
+intList.removeLast() // 0, 4, 1, 9, 2
 print("-----------")
-intList.insert(data: -1, index: 0)
+intList.insert(data: -1, index: 0) // -1 ,0 ,4, 1, 9, 2
 print("-----------")
-intList.insert(data: 10, index: 6)
+intList.insert(data: 10, index: 6) // -1, 0, 4, 1, 9, 2, 10
 print("-----------")
-intList.remove(at: 0)
+intList.remove(at: 0) // 0, 4, 1, 9, 2, 10
 print("-----------")
-intList.remove(at: 1)
+intList.remove(at: 1) // 0, 1, 9, 2, 10
 print("-----------")
-intList.remove(at: 4)
+intList.remove(at: 4) // 0, 1, 9, 10
+print("-----------")
+let result = intList.search(from: 0)
+print(result?.data) // 0
+print(result?.next?.data) // 1
+print(result?.next?.next?.data) // 9
+print(result?.next?.next?.next?.data) // 10
+
 
 // 이전 공부 기록
 //
