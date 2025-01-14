@@ -77,6 +77,247 @@ stringValue.updateValue("훈이", forKey: "이")
 print(stringValue.getValue(forKey: "김")) // 충돌 발생
 
 
+class Node<T: Equatable> {
+    var data: T?
+    var key: String
+    var next: Node?
+    
+    init(data: T, key: String, next: Node? = nil) {
+        self.data = data
+        self.key = key
+        self.next = next
+    }
+}
+
+class LinkedList<T: Equatable> {
+    private var head: Node<T>?
+    
+    func append(data: T, forKey key: String) {
+        if self.head == nil {
+            self.head = Node(data: data, key: key)
+            return
+        }
+        
+        var nowNode = self.head
+        while nowNode?.next != nil {
+            nowNode = nowNode?.next
+        }
+        
+        nowNode?.next = Node(data: data, key: key)
+    }
+    
+    func search(_ key: String) -> T? {
+        if self.head == nil {return nil}
+        
+        var nowNode = self.head
+        while nowNode != nil {
+            if nowNode?.key == key {
+                return nowNode?.data
+            }
+            nowNode = nowNode?.next
+        }
+        return nil
+    }
+    
+    func remove(_ key: String) -> Bool { // head가 없음을 bool로 리턴
+        if self.head == nil {return true}
+        if self.head?.next == nil && self.head?.key == key {
+            self.head = nil
+            return true
+        }
+        
+        var nowNode = self.head
+        while nowNode?.next != nil {
+            if nowNode?.next?.key == key {break}
+            nowNode = nowNode?.next
+        }
+        nowNode?.next = nowNode?.next?.next
+        return false
+    }
+}
+
+struct HashTableWithChaining<T: Equatable> {
+    private var hashTable: [LinkedList<T>?] = Array(repeating: nil, count: 10)
+    
+    private func hash(_ key: String) -> Int {
+        // key의 count에 따라 index를 반환하는 로직
+        key.count
+    }
+    
+    mutating func updateValue(_ data: T?, forKey key: String) {
+        let hash = self.hash(key)
+        if self.hashTable[hash] == nil && data != nil {
+            self.hashTable[hash] = LinkedList<T>() // 처음 hash에 값을 넣는 경우 LinkedList 생성
+            print("CREATE LINKEDLIST")
+        }
+        
+        if data == nil {
+            let isLast = self.hashTable[hash]!.remove(key) // data에 nil을 넣는 경우 remove
+            if isLast {
+                self.hashTable[hash] = nil // 만약 마지막 데이터를 지운 경우 LinkedList도 nil
+                print("REMOVE LINKEDLIST")
+            }
+        } else {
+            self.hashTable[hash]?.append(data: data!, forKey: key)
+        }
+        
+    }
+    
+    mutating func getValue(forKey key: String) -> T? {
+        let hash = self.hash(key)
+        return self.hashTable[hash]?.search(key)
+    }
+}
+
+print("-----------------")
+
+var stringValueWithChaining = HashTableWithChaining<String>()
+stringValueWithChaining.updateValue("철수", forKey: "김")
+stringValueWithChaining.updateValue("しんのすけ", forKey: "野原") // 신짱구
+stringValueWithChaining.updateValue("Milfer", forKey: "Penny") // 한유리
+
+print(stringValueWithChaining.getValue(forKey: "김"))
+print(stringValueWithChaining.getValue(forKey: "野原"))
+print(stringValueWithChaining.getValue(forKey: "Penny"))
+
+stringValueWithChaining.updateValue("훈이", forKey: "이")
+print(stringValueWithChaining.getValue(forKey: "김"))
+print(stringValueWithChaining.getValue(forKey: "이"))
+
+stringValueWithChaining.updateValue(nil, forKey: "Penny")
+print(stringValueWithChaining.getValue(forKey: "Penny"))
+
+
+struct HashTableWithLinearProbing<T: Equatable> {
+    struct DataSaveModel<T: Equatable> {
+        let key: String
+        let value: T
+    }
+    
+    private var hashTable: [DataSaveModel<T>?] = Array(repeating: nil, count: 10)
+    
+    private func hash(_ key: String) -> Int {
+        // key의 count에 따라 index를 반환하는 로직
+        key.count
+    }
+    
+    mutating func updateValue(_ data: T?, forKey key: String) {
+        if data == nil {
+            self.remove(forKey: key)
+            return
+        }
+        
+        let hash = self.hash(key)
+        let model = DataSaveModel(key: key, value: data!)
+        
+        if self.hashTable[hash] == nil {
+            self.hashTable[hash] = model
+            return
+        }
+        
+        let isUp = hash >= self.hashTable.count / 2
+        var index = 1
+        
+        while isUp ? index < self.hashTable.count : index >= 0 {
+            if self.hashTable.count > index + hash {
+                if self.hashTable[index + hash] == nil {
+                    self.hashTable[index + hash] = model
+                    return
+                }
+            }
+            if hash - index >= 0 {
+                if self.hashTable[hash - index] == nil {
+                    self.hashTable[hash - index] = model
+                    return
+                }
+            }
+            index += 1
+        }
+        
+        print("Array 공간을 꽉차서 더 이상 저장 불가")
+    }
+    
+    mutating private func remove(forKey key: String) {
+        let hash = self.hash(key)
+        
+        if self.hashTable[hash]?.key == key {
+            self.hashTable[hash] = nil
+            print("원래 자리에서 제거 됨, \(hash)")
+            return
+        }
+        
+        let isUp = hash >= self.hashTable.count / 2
+        var index = 1
+        
+        while isUp ? index < self.hashTable.count : index >= 0 {
+            if self.hashTable.count > index + hash {
+                if self.hashTable[index + hash]?.key == key {
+                    self.hashTable[index + hash] = nil
+                    print("다른 자리에서 제거됨")
+                    return
+                }
+            }
+            if hash - index >= 0 {
+                if self.hashTable[hash - index]?.key == key{
+                    self.hashTable[hash - index] = nil
+                    print("다른 자리에서 제거됨")
+                    return
+                }
+            }
+            index += 1
+        }
+    }
+    
+    mutating func getValue(forKey key: String) -> T? {
+        let hash = self.hash(key)
+        
+        if self.hashTable[hash]?.key == key {
+            return self.hashTable[hash]?.value
+        }
+        
+        let isUp = hash >= self.hashTable.count / 2
+        var index = 1
+        
+        while isUp ? index < self.hashTable.count : index >= 0 {
+            if self.hashTable.count > index + hash {
+                if self.hashTable[index + hash]?.key == key {
+                    return self.hashTable[index + hash]?.value
+                }
+            }
+            
+            if hash - index >= 0 {
+                if self.hashTable[hash - index]?.key == key {
+                    return self.hashTable[hash - index]?.value
+                }
+            }
+            index += 1
+        }
+      
+        return nil
+    }
+}
+
+print("-----------------")
+
+var stringValueLinearProbing = HashTableWithLinearProbing<String>()
+stringValueLinearProbing.updateValue("철수", forKey: "김")
+stringValueLinearProbing.updateValue("しんのすけ", forKey: "野原") // 신짱구
+stringValueLinearProbing.updateValue("Milfer", forKey: "Penny") // 한유리
+
+print(stringValueLinearProbing.getValue(forKey: "김"))
+print(stringValueLinearProbing.getValue(forKey: "野原"))
+print(stringValueLinearProbing.getValue(forKey: "Penny"))
+
+stringValueLinearProbing.updateValue("훈이", forKey: "이")
+print(stringValueLinearProbing.getValue(forKey: "김"))
+print(stringValueLinearProbing.getValue(forKey: "이"))
+
+stringValueLinearProbing.updateValue(nil, forKey: "Penny")
+print(stringValueLinearProbing.getValue(forKey: "Penny"))
+
+stringValueLinearProbing.updateValue("野原", forKey: "みさえさん")
+print(stringValueLinearProbing.getValue(forKey: "みさえさん"))
+
 
 // 이전 공부 기록
 //
