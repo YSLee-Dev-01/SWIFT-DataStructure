@@ -98,7 +98,22 @@ class BST<T: Comparable> {
                 }
             }
         }
+    }
+    
+    func search(data: T) -> Bool { // 있는지 여부를 Bool 값으로 반환
+        if self.rootNode == nil {return false}
         
+        var nowNode = self.rootNode
+        while nowNode != nil {
+            if nowNode!.data == data {
+                return true
+            } else if nowNode!.data < data {
+                nowNode = nowNode?.right
+            } else {
+                nowNode = nowNode?.left
+            }
+        }
+        return false
     }
 }
 
@@ -112,6 +127,8 @@ intValue.insert(data: 0)
 intValue.insert(data: -10)
 intValue.drawDiagram()
 
+print(intValue.search(data: 0))
+print(intValue.search(data: 1000))
 
 // 이전 공부 기록
 //// node 구성
