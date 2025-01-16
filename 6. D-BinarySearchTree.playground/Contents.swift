@@ -115,6 +115,54 @@ class BST<T: Comparable> {
         }
         return false
     }
+    
+    func delete(data: T) {
+        if self.rootNode == nil {return}
+        
+        var parentNode = self.rootNode!
+        var nowNode = self.rootNode
+        
+        while let node = nowNode {
+            if node.data == data {break}
+            if node.data < data {
+                nowNode = nowNode?.right
+            } else {
+                nowNode = nowNode?.left
+            }
+            parentNode = node
+        }
+        
+        if nowNode == nil {return} // nowNode가 nil일 경우 지울 데이터를 못찾은 것으로 간주
+        
+        // 자식이 없는 Node
+        if nowNode!.left == nil && nowNode!.right == nil {
+            if parentNode.data < nowNode!.data {
+                parentNode.right = nil
+            } else {
+                parentNode.left = nil
+            }
+            return
+        }
+        
+        // 자식이 하나만 있는 Node
+        if nowNode!.left != nil && nowNode!.right == nil {
+            if parentNode.data < nowNode!.data {
+                parentNode.right = nowNode?.left
+            } else {
+                parentNode.left = nowNode?.left
+            }
+            return
+        }
+        
+        if nowNode!.right != nil && nowNode!.left == nil {
+            if parentNode.data < nowNode!.data {
+                parentNode.right = nowNode?.right
+            } else {
+                parentNode.left = nowNode?.right
+            }
+            return
+        }
+    }
 }
 
 var intValue = BST<Int>()
@@ -129,6 +177,12 @@ intValue.drawDiagram()
 
 print(intValue.search(data: 0))
 print(intValue.search(data: 1000))
+
+intValue.delete(data: -10)
+intValue.drawDiagram()
+
+intValue.delete(data: 25)
+intValue.drawDiagram()
 
 // 이전 공부 기록
 //// node 구성
