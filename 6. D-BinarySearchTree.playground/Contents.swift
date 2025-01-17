@@ -55,20 +55,20 @@ class BST<T: Comparable> {
     func drawDiagram() {
         print(diagram(for: self.rootNode))
     }
-     
+    
     private func diagram(for node: Node<T>?,
                          _ top: String = "",
                          _ root: String = "",
                          _ bottom: String = "") -> String {
-       guard let node = node else {
+        guard let node = node else {
             return root + "nil\n"
         }
         if node.left == nil && node.right == nil {
             return root + "\(node.data)\n"
         }
         return diagram(for: node.right, top + " ", top + "┌──", top + "│ ")
-            + root + "\(node.data)\n"
-            + diagram(for: node.left, bottom + "│ ", bottom + "└──", bottom + " ")
+        + root + "\(node.data)\n"
+        + diagram(for: node.left, bottom + "│ ", bottom + "└──", bottom + " ")
     }
     
     func insert(data: T) {
@@ -118,6 +118,23 @@ class BST<T: Comparable> {
     
     func delete(data: T) {
         if self.rootNode == nil {return}
+        var isRootCheck = false
+        
+        if self.rootNode?.data == data {
+            if self.rootNode?.left == nil && self.rootNode?.right == nil {
+                self.rootNode = nil
+                return
+            }
+            
+            if self.rootNode?.left == nil && self.rootNode?.right != nil {
+                self.rootNode = self.rootNode?.right
+                return
+            } else if self.rootNode?.left != nil && self.rootNode?.right == nil {
+                self.rootNode = self.rootNode?.left
+                return
+            }
+            isRootCheck = true
+        }
         
         var parentNode = self.rootNode!
         var nowNode = self.rootNode
@@ -134,33 +151,66 @@ class BST<T: Comparable> {
         
         if nowNode == nil {return} // nowNode가 nil일 경우 지울 데이터를 못찾은 것으로 간주
         
-        // 자식이 없는 Node
-        if nowNode!.left == nil && nowNode!.right == nil {
-            if parentNode.data < nowNode!.data {
-                parentNode.right = nil
-            } else {
-                parentNode.left = nil
+        if !isRootCheck {
+            // 자식이 없는 Node
+            if nowNode!.left == nil && nowNode!.right == nil {
+                if parentNode.data < nowNode!.data {
+                    parentNode.right = nil
+                } else {
+                    parentNode.left = nil
+                }
+                return
             }
-            return
+            
+            // 자식이 하나만 있는 Node
+            if nowNode!.left != nil && nowNode!.right == nil {
+                if parentNode.data < nowNode!.data {
+                    parentNode.right = nowNode?.left
+                } else {
+                    parentNode.left = nowNode?.left
+                }
+                return
+            }
+            
+            if nowNode!.right != nil && nowNode!.left == nil {
+                if parentNode.data < nowNode!.data {
+                    parentNode.right = nowNode?.right
+                } else {
+                    parentNode.left = nowNode?.right
+                }
+                return
+            }
         }
         
-        // 자식이 하나만 있는 Node
-        if nowNode!.left != nil && nowNode!.right == nil {
-            if parentNode.data < nowNode!.data {
-                parentNode.right = nowNode?.left
-            } else {
-                parentNode.left = nowNode?.left
-            }
-            return
+        var minNode = nowNode?.right
+        var minPNode = nowNode?.right
+        while let node = minNode?.left {
+            minPNode = minNode
+            minNode = node
         }
         
-        if nowNode!.right != nil && nowNode!.left == nil {
-            if parentNode.data < nowNode!.data {
-                parentNode.right = nowNode?.right
+        let right = minNode?.right
+        
+        if isRootCheck {
+            let afteSuper = self.rootNode
+            minNode?.right = nil
+            minPNode?.left = right
+            self.rootNode = minNode!
+            
+            self.rootNode?.left = afteSuper?.left
+            self.rootNode?.right = afteSuper?.right
+            
+        } else {
+            minNode?.left = nowNode?.left
+            minNode?.right = nowNode?.right
+            
+            if parentNode.data < data {
+                parentNode.right = minNode
             } else {
-                parentNode.left = nowNode?.right
+                parentNode.left = minNode
             }
-            return
+            
+            minPNode?.left = right
         }
     }
 }
@@ -184,13 +234,38 @@ intValue.drawDiagram()
 intValue.delete(data: 25)
 intValue.drawDiagram()
 
+intValue.insert(data: 85)
+intValue.insert(data: 90)
+intValue.insert(data: 79)
+intValue.insert(data: 77)
+intValue.insert(data: 78)
+intValue.drawDiagram()
+
+intValue.delete(data: 75)
+intValue.drawDiagram()
+
+intValue.delete(data: 0)
+intValue.drawDiagram()
+
+intValue.delete(data: 50)
+intValue.drawDiagram()
+
+intValue.insert(data: 200)
+intValue.insert(data: 220)
+intValue.insert(data: 180)
+intValue.insert(data: 190)
+intValue.drawDiagram()
+
+intValue.delete(data: 100)
+intValue.drawDiagram()
+
 // 이전 공부 기록
 //// node 구성
 //class Node<T: Comparable> {
 //    var data: T
 //    var left: Node?
 //    var right: Node?
-//    
+//
 //    init(data: T) {
 //        self.data = data
 //    }
@@ -198,37 +273,37 @@ intValue.drawDiagram()
 //
 //class BinarySearchTree<T: Comparable> {
 //    var root: Node<T>?
-//    
+//
 //    func search(data: T) -> Bool {
 //        // root가 없을 경우
 //        guard self.root != nil else {return false}
-//        
+//
 //        var currentNode = self.root
 //        while let node = currentNode {
 //            if node.data == data {
 //                return true
 //            }
-//            
+//
 //            if node.data > data {
 //                currentNode = node.left
 //            } else {
 //                currentNode = node.right
 //            }
 //        }
-//        
+//
 //        return false
 //    }
-//    
+//
 //    func insert(data: T) {
 //        // 중복여부 파악
 //        guard !self.search(data: data) else {return}
-//             
+//
 //        // root가 없을 경우
 //        guard let root = self.root else {
 //            self.root = Node(data: data)
 //            return
 //        }
-//        
+//
 //        var currentNode = root
 //        while true {
 //            if currentNode.data > data {
@@ -244,11 +319,11 @@ intValue.drawDiagram()
 //            }
 //        }
 //    }
-//    
+//
 //    func delete(data: T) -> Bool {
 //        // 값이 없을 때
 //        guard let root = self.root else {return false}
-//        
+//
 //        // root만 있는 경우에서 root를 지우는 경우
 //        guard self.root?.left != nil &&
 //                self.root?.right != nil &&
@@ -256,14 +331,14 @@ intValue.drawDiagram()
 //            self.root = nil
 //            return true
 //        }
-//        
+//
 //        var parentNode = root
 //        var currentNode = self.root
-//        
+//
 //        while let node = currentNode {
 //            // 삭제항목 찾으면
 //            if node.data == data {break}
-//            
+//
 //            if node.data > data {
 //                currentNode = node.left
 //            } else {
@@ -271,15 +346,15 @@ intValue.drawDiagram()
 //            }
 //            parentNode = node
 //        }
-//        
+//
 //        // 필터가 없을 경우
 //        guard let removeNode = currentNode else {
 //            return false
 //        }
-//        
+//
 //        // left, right 구문
 //        let filter = parentNode.data > removeNode.data
-//        
+//
 //        // leaf node 제거
 //        if removeNode.left == nil && removeNode.right == nil {
 //            if filter {
@@ -287,10 +362,10 @@ intValue.drawDiagram()
 //            } else {
 //                parentNode.right = nil
 //            }
-//            
+//
 //            return true
 //        }
-//        
+//
 //        // child가 하나만 있는 경우
 //        // left
 //        if removeNode.left != nil && removeNode.right == nil {
@@ -299,7 +374,7 @@ intValue.drawDiagram()
 //            } else {
 //                parentNode.right = removeNode.left
 //            }
-//            
+//
 //            return true
 //        } else if removeNode.left == nil && removeNode.right != nil { // right
 //            if filter {
@@ -307,21 +382,21 @@ intValue.drawDiagram()
 //            } else {
 //                parentNode.right = removeNode.right
 //            }
-//            
+//
 //            return true
 //        }
-//        
+//
 //        // child가 여러개 있는 경우
 //        guard let removeNodeRight = removeNode.right else {return false}
 //        var changeNode = removeNodeRight
 //        var changeNodeParent = removeNodeRight
-//      
+//
 //        // left 끝까지
 //        while let node = changeNode.left {
 //            changeNodeParent = changeNode
 //            changeNode = node
 //        }
-//        
+//
 //        // right가 있는지 여부 확인 + 한번도 left로 내려가지 않은 경우
 //        if changeNode.data != removeNodeRight.data {
 //            if let rightNode = changeNode.right {
@@ -334,23 +409,23 @@ intValue.drawDiagram()
 //        } else {
 //            changeNode.left = removeNode.left
 //        }
-//       
-//        
+//
+//
 //        // 값 변경
 //        if filter {
 //            parentNode.left = changeNode
 //        } else {
 //            parentNode.right = changeNode
 //        }
-//        
+//
 //
 //        return true
 //    }
-//    
+//
 //    func drawDiagram() {
 //        print(diagram(for: self.root))
 //    }
-//     
+//
 //    private func diagram(for node: Node<T>?,
 //                         _ top: String = "",
 //                         _ root: String = "",
